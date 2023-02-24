@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>plycpp</name>
+  <name>polygon_file_format_c_plus_plus</name>
   <version>0.0.0</version>
-  <description>plycpp</description>
-  <maintainer email="jad.alhajj@inmind.ai">Jad</maintainer>
+  <description>Package that handles the plycpp</description>
+  <maintainer email="jad.alhajj@inmind.ai">Jad AL HAJJ</maintainer>
   <license>Proprietary</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

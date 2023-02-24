@@ -19,20 +19,18 @@ include_directories(
 add_library(plycpp SHARED src/plycpp.cpp)
 
 install(
-  TARGETS plycpp
-  EXPORT plycpp)
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME} Targets)
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 install(
-  DIRECTORY include/${PROJECT_NAME}/
+  DIRECTORY include/
   DESTINATION include
 )
-add_executable(plycpp_example src/example.cpp)
-target_link_libraries(plycpp_example plycpp)
-target_compile_definitions(plycpp_example PRIVATE MODELS_DIRECTORY="${MODELS_DIRECTORY}")
 
-ament_export_libraries(plycpp)
+ament_export_targets(${PROJECT_NAME}Targets HAS_LIBRARY_TARGET)
 ament_package()
