@@ -34,10 +34,5 @@ add_executable(plycpp_example src/example.cpp)
 target_link_libraries(plycpp_example plycpp)
 target_compile_definitions(plycpp_example PRIVATE MODELS_DIRECTORY="${MODELS_DIRECTORY}")
 
-if(BUILD_TESTING)
-find_package(ament_lint_auto REQUIRED)
-ament_lint_auto_find_test_dependencies()
-endif()
-
 ament_export_libraries(plycpp)
 ament_package()
