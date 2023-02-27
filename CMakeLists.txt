@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(plycpp)
+project(polygon_file_format_c_plus_plus)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 
@@ -16,11 +16,11 @@ include_directories(
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-add_library(plycpp SHARED src/plycpp.cpp)
+add_library(polygon_file_format_c_plus_plus SHARED src/plycpp.cpp)
 
 install(
   TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME} Targets)
+  EXPORT ${PROJECT_NAME}Targets)
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC
