@@ -20,7 +20,7 @@ add_library(plycpp SHARED src/plycpp.cpp)
 
 install(
   TARGETS ${PROJECT_NAME}
-  EXPORT ${PROJECT_NAME} Targets)
+  EXPORT ${PROJECT_NAME}Targets)
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC

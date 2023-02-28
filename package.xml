@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>polygon_file_format_c_plus_plus</name>
+  <name>plycpp</name>
   <version>0.0.0</version>
   <description>Package that handles the plycpp</description>
   <maintainer email="jad.alhajj@inmind.ai">Jad AL HAJJ</maintainer>
