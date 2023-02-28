@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(polygon_file_format_c_plus_plus)
+project(plycpp)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 
