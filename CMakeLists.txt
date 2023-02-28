@@ -16,7 +16,7 @@ include_directories(
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
-add_library(polygon_file_format_c_plus_plus SHARED src/plycpp.cpp)
+add_library(plycpp SHARED src/plycpp.cpp)
 
 install(
   TARGETS ${PROJECT_NAME}
