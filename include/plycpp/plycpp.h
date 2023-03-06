@@ -179,6 +179,10 @@ private:
 /// Load PLY data
 void load(const std::string &filename, PLYData &data);
 
+/// function that transform a vector Cloud to pointXYZI
+pcl::PointCloud<pcl::PointXYZI>::Ptr
+convertVectorToXYZI(const std::vector<std::array<float, 3>> &points);
+
 /// custom load
 void loadPLYFile(const std::string &filename,
                  pcl::PointCloud<pcl::PointXYZI>::Ptr cloud);
