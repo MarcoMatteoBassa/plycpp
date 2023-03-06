@@ -638,4 +638,18 @@ namespace plycpp
 		plycpp::fromPointCloud<float, Cloud>(points, data);
 		plycpp::save(filename, data, format);
 	}
+	void loadPLYFile(const std::string &filename, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+	{
+		plycpp::PLYData data;
+		typedef std::vector<std::array<float, 3>> Cloud;
+		Cloud points;
+		for (size_t index = 0; index < cloud->points.size(); index++)
+		{
+			points.push_back({cloud->points.at(index).x,
+							  cloud->points.at(index).y,
+							  cloud->points.at(index).z});
+		}
+		plycpp::fromPointCloud<float, Cloud>(points, data);
+		plycpp::load(filename, data);
+	}
 }
