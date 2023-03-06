@@ -216,13 +216,13 @@ namespace plycpp
 	void load(const std::string &filename, PLYData &data);
 
 	/// custom load
-	void loadPLYFile(const std::string &filename, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+	void loadPLYFile(const std::string &filename, pcl::PointCloud<pcl::PointXYZI>::Ptr cloud);
 
 	/// Save PLY data
 	void save(const std::string &filename, const PLYData &data, const FileFormat format = FileFormat::BINARY);
 
 	/// Custom Save function
-	void savePLYFile(const std::string &filename, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, const FileFormat format = FileFormat::BINARY);
+	void savePLYFile(const std::string &filename, pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, const FileFormat format = FileFormat::BINARY);
 	/// Pack n properties -- each represented by a vector of type T --
 	/// into a multichannel vector (e.g. of type vector<std::array<T, n> >)
 	template <typename T, typename OutputVector>

@@ -624,7 +624,7 @@ namespace plycpp
 			throw Exception("Problem while writing binary data");
 		}
 	}
-	void savePLYFile(const std::string &filename, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, const FileFormat format)
+	void savePLYFile(const std::string &filename, pcl::PointCloud<pcl::PointXYZI>::Ptr cloud, const FileFormat format)
 	{
 		plycpp::PLYData data;
 		typedef std::vector<std::array<float, 3>> Cloud;
@@ -638,7 +638,7 @@ namespace plycpp
 		plycpp::fromPointCloud<float, Cloud>(points, data);
 		plycpp::save(filename, data, format);
 	}
-	void loadPLYFile(const std::string &filename, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+	void loadPLYFile(const std::string &filename, pcl::PointCloud<pcl::PointXYZI>::Ptr cloud)
 	{
 		plycpp::PLYData data;
 		typedef std::vector<std::array<float, 3>> Cloud;
