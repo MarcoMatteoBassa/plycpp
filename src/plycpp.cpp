@@ -531,17 +531,46 @@ void savePLYFile(const std::string &filename,
   plycpp::fromPointCloud<float, Cloud>(points, data);
   plycpp::save(filename, data, format);
 }
-void loadPLYFile(const std::string &filename,
-                 pcl::PointCloud<pcl::PointXYZI>::Ptr cloud) {
-  plycpp::PLYData data;
-  typedef std::vector<std::array<float, 3>> Cloud;
-  Cloud points;
-  points.reserve(cloud->size());
-  for (size_t index = 0; index < cloud->points.size(); index++) {
-    points.push_back({cloud->points.at(index).x, cloud->points.at(index).y,
-                      cloud->points.at(index).z});
+pcl::PointCloud<pcl::PointXYZI>::Ptr
+convertVectorToXYZI(const std::vector<std::array<float, 4>> &points) {
+  // Create a new PointCloud object of type PointXYZI
+  pcl::PointCloud<pcl::PointXYZI>::Ptr cloud_out(
+      new pcl::PointCloud<pcl::PointXYZI>);
+
+  // Resize the PointCloud to the same size as the input vector
+  cloud_out->points.resize(points.size());
+
+  // Iterate through each point in the input vector
+  for (size_t i = 0; i < points.size(); i++) {
+    // Create a new PointXYZI object for the current point
+    pcl::PointXYZI point;
+
+    // Copy the x, y, and z fields from the input vector to the output PointXYZI
+    // object
+    point.x = points[i][0];
+    point.y = points[i][1];
+    point.z = points[i][2];
+    point.intensity = points[i][3];
+
+    // Add the PointXYZI object to the output PointCloud
+    cloud_out->points[i] = point;
   }
-  plycpp::fromPointCloud<float, Cloud>(points, data);
-  plycpp::load(filename, data);
+
+  // Set the width and height of the PointCloud object
+  cloud_out->width = points.size();
+  cloud_out->height = 1;
+
+  return cloud_out;
 }
+
+void loadPLYFile(const std::string &filename,
+                 pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud) {
+  plycpp::PLYData data;
+  typedef std::vector<std::array<float, 4>> Cloud;
+  Cloud points;
+  plycpp::load(filename, data);
+  plycpp::toPointCloud<float, Cloud>(data, points);
+  cloud = convertVectorToXYZI(points);
+}
+
 } // namespace plycpp
