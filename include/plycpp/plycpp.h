@@ -50,7 +50,9 @@ protected:
   std::string exception_;
 
 public:
-  Exception(const std::string &msg) : exception_(msg.c_str()) {}
+  Exception(const std::string &msg) : exception_(msg.c_str()) {
+    std::cout << exception_ << std::endl;
+  }
 };
 
 template <typename Key, typename T> struct KeyData {
@@ -179,21 +181,33 @@ private:
 /// Load PLY data
 void load(const std::string &filename, PLYData &data);
 
-/// function that transform a vector Cloud to pointXYZI
-pcl::PointCloud<pcl::PointXYZI>::Ptr
-convertVectorToXYZI(const std::vector<std::array<float, 3>> &points);
-
 /// custom load
 void loadPLYFile(const std::string &filename,
-                 pcl::PointCloud<pcl::PointXYZI>::Ptr cloud);
+                 pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
+
+/// load PLY data with intensity
+void loadPLYFileI(const std::string &filename,
+                 pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud);
+
+/// function that transform a vector Cloud to pointXYZI
+pcl::PointCloud<pcl::PointXYZ>::Ptr
+convertVectorToXYZ(const std::vector<std::array<float, 3>> &points);
+
+/// function that transform a vector Cloud to pointXYZ
+pcl::PointCloud<pcl::PointXYZI>::Ptr
+convertVectorToXYZI(const std::vector<std::array<float, 4>> &points);
 
 /// Save PLY data
 void save(const std::string &filename, const PLYData &data,
           const FileFormat format = FileFormat::BINARY);
 
+/// Save PLY data with intensity
+void savePLYFileI(const std::string &filename,
+                          pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,
+                          const FileFormat format = FileFormat::BINARY);
 /// Custom Save function
 void savePLYFile(const std::string &filename,
-                 pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,
+                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
                  const FileFormat format = FileFormat::BINARY);
 /// Pack n properties -- each represented by a vector of type T --
 /// into a multichannel vector (e.g. of type vector<std::array<T, n> >)
@@ -203,8 +217,10 @@ void packProperties(
     OutputVector &output) {
   output.clear();
 
-  if (properties.empty() || !properties.front())
+  if (properties.empty() || !properties.front()) {
+    std::cout << "Missing properties";
     throw Exception("Missing properties");
+  }
 
   const size_t size = properties.front()->size();
   const size_t nbProperties = properties.size();
@@ -214,6 +230,9 @@ void packProperties(
   for (auto &prop : properties) {
     // Check type consistency
     if (!prop || !prop->isOfType<T>() || prop->size() != size) {
+      std::cout << std::string("Missing properties or type inconsistency. I "
+                               "was expecting data of type ") +
+                       typeid(T).name();
       throw Exception(std::string("Missing properties or type inconsistency. I "
                                   "was expecting data of type ") +
                       typeid(T).name());
@@ -266,6 +285,18 @@ void toPointCloud(const PLYData &plyData, Cloud &cloud) {
 }
 
 template <typename T, typename Cloud>
+void toPointCloudI(const PLYData &plyData, Cloud &cloud) {
+  cloud.clear();
+  auto plyVertex = plyData["vertex"];
+  if (plyVertex->size() == 0)
+    return;
+  std::vector<std::shared_ptr<const PropertyArray>> properties{
+      plyVertex->properties["x"], plyVertex->properties["y"],
+      plyVertex->properties["z"],plyVertex->properties["intensity"]};
+  packProperties<T, Cloud>(properties, cloud);
+}
+
+template <typename T, typename Cloud>
 void toNormalCloud(const PLYData &plyData, Cloud &cloud) {
   cloud.clear();
   auto plyVertex = plyData["vertex"];
@@ -290,6 +321,24 @@ void fromPointCloud(const Cloud &points, PLYData &plyData) {
   vertex->properties.push_back("x", positionProperties[0]);
   vertex->properties.push_back("y", positionProperties[1]);
   vertex->properties.push_back("z", positionProperties[2]);
+
+  plyData.push_back("vertex", vertex);
+}
+
+template <typename T, typename Cloud>
+void fromPointCloudI(const Cloud &points, PLYData &plyData) {
+  const size_t size = points.size();
+
+  plyData.clear();
+
+  std::vector<std::shared_ptr<PropertyArray>> positionProperties(4);
+  unpackProperties<T, Cloud>(points, positionProperties);
+
+  std::shared_ptr<ElementArray> vertex(new ElementArray(size));
+  vertex->properties.push_back("x", positionProperties[0]);
+  vertex->properties.push_back("y", positionProperties[1]);
+  vertex->properties.push_back("z", positionProperties[2]);
+  vertex->properties.push_back("intensity", positionProperties[3]);
 
   plyData.push_back("vertex", vertex);
 }
