@@ -301,19 +301,21 @@ void load(const std::string &filename, PLYData &data) {
       currentElement.reset(new ElementArray(count));
 
       data.push_back(name, currentElement);
-    } else if (lineContent.size() == 3 && lineContent[0] == "property") {
+    }
+    else if (lineContent.size() == 3 && lineContent[0] == "property")
+    {
       if (!currentElement)
         throw Exception("Header issue!");
-
       // New property
       const std::type_index dataType = parseDataType(lineContent[1]);
       const std::string &name = lineContent[2];
-
       std::shared_ptr<PropertyArray> newProperty(
           new PropertyArray(dataType, currentElement->size()));
       currentElement->properties.push_back(name, newProperty);
-    } else if (lineContent.size() == 5 && lineContent[0] == "property" &&
-               lineContent[1] == "list") {
+    }
+    else if (lineContent.size() == 5 && lineContent[0] == "property" &&
+             lineContent[1] == "list")
+    {
       if (!currentElement)
         throw Exception("Header issue!");
 
@@ -437,6 +439,37 @@ void writeDataContent(std::ofstream &fout, const PLYData &data) {
   }
 }
 
+void savePLYFileI(const std::string &filename,
+                          pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,
+                          const plycpp::FileFormat format) {
+  plycpp::PLYData data;
+  typedef std::vector<std::array<float, 4>> Cloud;
+  Cloud points;
+  points.reserve(cloud->size());
+  for (size_t index = 0; index < cloud->points.size(); index++) {
+    points.push_back({cloud->points.at(index).x, cloud->points.at(index).y,
+                      cloud->points.at(index).z,
+                      cloud->points.at(index).intensity});
+  }
+  plycpp::fromPointCloudI<float, Cloud>(points, data);
+  plycpp::save(filename, data, format);
+}
+
+void savePLYFile(const std::string &filename,
+                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+                 const plycpp::FileFormat format) {
+  plycpp::PLYData data;
+  typedef std::vector<std::array<float, 3>> Cloud;
+  Cloud points;
+  points.reserve(cloud->size());
+  for (size_t index = 0; index < cloud->points.size(); index++) {
+    points.push_back({cloud->points.at(index).x, cloud->points.at(index).y,
+                      cloud->points.at(index).z});
+  }
+  plycpp::fromPointCloud<float, Cloud>(points, data);
+  plycpp::save(filename, data, format);
+}
+
 void save(const std::string &filename, const PLYData &data,
           const FileFormat format) {
   std::ofstream fout(filename, std::ios::binary);
@@ -464,7 +497,8 @@ void save(const std::string &filename, const PLYData &data,
     auto &elementArray = elementArrayTuple.data;
     const size_t elementsCount = elementArray->size();
 
-    fout << "element " << elementArrayName << " " << elementsCount << std::endl;
+    fout << "element " << elementArrayName << " " << elementsCount
+              << std::endl;
     // Iterate over properties
     for (const auto &propertyTuple : elementArray->properties) {
       auto &propName = propertyTuple.key;
@@ -517,20 +551,7 @@ void save(const std::string &filename, const PLYData &data,
     throw Exception("Problem while writing binary data");
   }
 }
-void savePLYFile(const std::string &filename,
-                 pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,
-                 const FileFormat format) {
-  plycpp::PLYData data;
-  typedef std::vector<std::array<float, 3>> Cloud;
-  Cloud points;
-  points.reserve(cloud->size());
-  for (size_t index = 0; index < cloud->points.size(); index++) {
-    points.push_back({cloud->points.at(index).x, cloud->points.at(index).y,
-                      cloud->points.at(index).z});
-  }
-  plycpp::fromPointCloud<float, Cloud>(points, data);
-  plycpp::save(filename, data, format);
-}
+
 pcl::PointCloud<pcl::PointXYZI>::Ptr
 convertVectorToXYZI(const std::vector<std::array<float, 4>> &points) {
   // Create a new PointCloud object of type PointXYZI
@@ -545,8 +566,8 @@ convertVectorToXYZI(const std::vector<std::array<float, 4>> &points) {
     // Create a new PointXYZI object for the current point
     pcl::PointXYZI point;
 
-    // Copy the x, y, and z fields from the input vector to the output PointXYZI
-    // object
+    // Copy the x, y, z and intensity fields from the input vector to the output
+    // PointXYZI object
     point.x = points[i][0];
     point.y = points[i][1];
     point.z = points[i][2];
@@ -563,14 +584,61 @@ convertVectorToXYZI(const std::vector<std::array<float, 4>> &points) {
   return cloud_out;
 }
 
+pcl::PointCloud<pcl::PointXYZ>::Ptr
+convertVectorToXYZ(const std::vector<std::array<float, 3>> &points) {
+  // Create a new PointCloud object of type PointXYZI
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out(
+      new pcl::PointCloud<pcl::PointXYZ>);
+
+  // Resize the PointCloud to the same size as the input vector
+  cloud_out->points.resize(points.size());
+
+  // Iterate through each point in the input vector
+  for (size_t i = 0; i < points.size(); i++) {
+    // Create a new PointXYZI object for the current point
+    pcl::PointXYZ point;
+
+    // Copy the x, y, z and intensity fields from the input vector to the output
+    // PointXYZI object
+    point.x = points[i][0];
+    point.y = points[i][1];
+    point.z = points[i][2];
+
+    // Add the PointXYZI object to the output PointCloud
+    cloud_out->points[i] = point;
+  }
+
+  // Set the width and height of the PointCloud object
+  cloud_out->width = points.size();
+  cloud_out->height = 1;
+
+  return cloud_out;
+}
+
 void loadPLYFile(const std::string &filename,
-                 pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud) {
+                 pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud) {
   plycpp::PLYData data;
-  typedef std::vector<std::array<float, 4>> Cloud;
+  typedef std::vector<std::array<float, 3>> Cloud;
   Cloud points;
   plycpp::load(filename, data);
   plycpp::toPointCloud<float, Cloud>(data, points);
-  cloud = convertVectorToXYZI(points);
+  cloud = plycpp::convertVectorToXYZ(points);
+}
+
+void loadPLYFileI(const std::string &filename,
+                  pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud) {
+  plycpp::PLYData data;
+  typedef std::vector<std::array<float, 4>> Cloud;
+  Cloud points;
+  std::cout << "before load" << std::endl;
+  plycpp::load(filename, data);
+  std::cout << "before toPointCloud" << std::endl;
+
+  plycpp::toPointCloudI<float, Cloud>(data, points);
+  std::cout << "before convertVectorToXYZI" << std::endl;
+
+  cloud = plycpp::convertVectorToXYZI(points);
+  std::cout << "after convertVectorToXYZI" << std::endl;
 }
 
 } // namespace plycpp
