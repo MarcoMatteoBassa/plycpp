@@ -301,9 +301,7 @@ void load(const std::string &filename, PLYData &data) {
       currentElement.reset(new ElementArray(count));
 
       data.push_back(name, currentElement);
-    }
-    else if (lineContent.size() == 3 && lineContent[0] == "property")
-    {
+    } else if (lineContent.size() == 3 && lineContent[0] == "property") {
       if (!currentElement)
         throw Exception("Header issue!");
       // New property
@@ -312,10 +310,8 @@ void load(const std::string &filename, PLYData &data) {
       std::shared_ptr<PropertyArray> newProperty(
           new PropertyArray(dataType, currentElement->size()));
       currentElement->properties.push_back(name, newProperty);
-    }
-    else if (lineContent.size() == 5 && lineContent[0] == "property" &&
-             lineContent[1] == "list")
-    {
+    } else if (lineContent.size() == 5 && lineContent[0] == "property" &&
+               lineContent[1] == "list") {
       if (!currentElement)
         throw Exception("Header issue!");
 
@@ -440,8 +436,8 @@ void writeDataContent(std::ofstream &fout, const PLYData &data) {
 }
 
 void savePLYFileI(const std::string &filename,
-                          pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,
-                          const plycpp::FileFormat format) {
+                  pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,
+                  const plycpp::FileFormat format) {
   plycpp::PLYData data;
   typedef std::vector<std::array<float, 4>> Cloud;
   Cloud points;
@@ -497,8 +493,7 @@ void save(const std::string &filename, const PLYData &data,
     auto &elementArray = elementArrayTuple.data;
     const size_t elementsCount = elementArray->size();
 
-    fout << "element " << elementArrayName << " " << elementsCount
-              << std::endl;
+    fout << "element " << elementArrayName << " " << elementsCount << std::endl;
     // Iterate over properties
     for (const auto &propertyTuple : elementArray->properties) {
       auto &propName = propertyTuple.key;
@@ -630,15 +625,9 @@ void loadPLYFileI(const std::string &filename,
   plycpp::PLYData data;
   typedef std::vector<std::array<float, 4>> Cloud;
   Cloud points;
-  std::cout << "before load" << std::endl;
   plycpp::load(filename, data);
-  std::cout << "before toPointCloud" << std::endl;
-
   plycpp::toPointCloudI<float, Cloud>(data, points);
-  std::cout << "before convertVectorToXYZI" << std::endl;
-
   cloud = plycpp::convertVectorToXYZI(points);
-  std::cout << "after convertVectorToXYZI" << std::endl;
 }
 
 } // namespace plycpp
