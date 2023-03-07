@@ -19,24 +19,30 @@ include_directories(
 )
 
 add_library(plycpp SHARED src/plycpp.cpp)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${PCL_LIBRARIES})
+
+ament_target_dependencies(${PROJECT_NAME} PUBLIC
+  pcl_conversions
+)
 
 install(
   TARGETS ${PROJECT_NAME}
   EXPORT ${PROJECT_NAME}Targets)
 
-target_include_directories(${PROJECT_NAME}
-  PUBLIC
-  $<INSTALL_INTERFACE:include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-)
-ament_target_dependencies(${PROJECT_NAME} PUBLIC
-  pcl_conversions
-)
 install(
   DIRECTORY include/
   DESTINATION include
 )
-target_link_libraries(${PROJECT_NAME} PUBLIC ${PCL_LIBRARIES})
+add_executable(run_test src/test.cpp)
+target_link_libraries(run_test plycpp)
+install(TARGETS run_test
+  DESTINATION bin/${PROJECT_NAME}
+)
+add_executable(run_test_intensity src/test_intensity.cpp)
+target_link_libraries(run_test_intensity plycpp)
+install(TARGETS run_test_intensity
+  DESTINATION bin/${PROJECT_NAME}
+)
 ament_export_dependencies(
   pcl_conversions
 )
