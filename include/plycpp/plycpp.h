@@ -187,7 +187,7 @@ void loadPLYFile(const std::string &filename,
 
 /// load PLY data with intensity
 void loadPLYFileI(const std::string &filename,
-                 pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud);
+                  pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud);
 
 /// function that transform a vector Cloud to pointXYZI
 pcl::PointCloud<pcl::PointXYZ>::Ptr
@@ -203,8 +203,8 @@ void save(const std::string &filename, const PLYData &data,
 
 /// Save PLY data with intensity
 void savePLYFileI(const std::string &filename,
-                          pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,
-                          const FileFormat format = FileFormat::BINARY);
+                  pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,
+                  const FileFormat format = FileFormat::BINARY);
 /// Custom Save function
 void savePLYFile(const std::string &filename,
                  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
@@ -292,7 +292,7 @@ void toPointCloudI(const PLYData &plyData, Cloud &cloud) {
     return;
   std::vector<std::shared_ptr<const PropertyArray>> properties{
       plyVertex->properties["x"], plyVertex->properties["y"],
-      plyVertex->properties["z"],plyVertex->properties["intensity"]};
+      plyVertex->properties["z"], plyVertex->properties["intensity"]};
   packProperties<T, Cloud>(properties, cloud);
 }
 
