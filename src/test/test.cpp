@@ -39,24 +39,13 @@ TEST(TestpointXYZCase, TestpointXYZ) {
               << " z: " << loaded_cloud->points.at(index).z << std::endl;
   }
 
-  //   Check if the loaded point cloud is equal to the original point cloud
-  bool test_passed = true;
-  if (cloud->size() != loaded_cloud->size()) {
-    std::cout << "Error: point cloud sizes do not match" << std::endl;
-    test_passed = false;
-    EXPECT_EQ(test_passed, false);
-  }
+  ASSERT_EQ(cloud->size(), loaded_cloud->size());
   for (int i = 0; i < cloud->size(); i++) {
-    if (cloud->points[i].x != loaded_cloud->points[i].x ||
-        cloud->points[i].y != loaded_cloud->points[i].y ||
-        cloud->points[i].z != loaded_cloud->points[i].z) {
-      std::cout << "Error: point " << i << " does not match" << std::endl;
-      test_passed = false;
-      EXPECT_EQ(test_passed, false);
-    }
+    bool points_are_different = (cloud->points[i].x != loaded_cloud->points[i].x ||
+                                 cloud->points[i].y != loaded_cloud->points[i].y ||
+                                 cloud->points[i].z != loaded_cloud->points[i].z);
+    EXPECT_FALSE(points_are_different);
   }
-
-  EXPECT_EQ(test_passed, true);
   EXPECT_TRUE(std::filesystem::exists("/tmp/test.ply"));
 }
 
