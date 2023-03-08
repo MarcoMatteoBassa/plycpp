@@ -21,13 +21,13 @@
 // SOFTWARE.
 
 //#include <vld.h>
-#include "plycpp/plycpp.h"
 #include <array>
 #include <filesystem>
 #include <iostream>
 
-int main() {
+#include "plycpp/plycpp.h"
 
+int main() {
   try {
     std::cout << "Loading PLY data..." << std::endl;
     plycpp::PLYData data;
@@ -39,14 +39,11 @@ int main() {
     {
       std::cout << "List of elements and properties:\n"
                 << "===========================" << std::endl;
-      for (const auto &element : data) {
-        std::cout << "* " << element.key << " -- size: " << element.data->size()
-                  << std::endl;
-        for (const auto &prop : element.data->properties) {
-          std::cout << "    - " << prop.key
-                    << " -- type: " << (prop.data->isList ? "list of " : "")
-                    << prop.data->type.name()
-                    << " -- size: " << prop.data->size() << std::endl;
+      for (const auto& element : data) {
+        std::cout << "* " << element.key << " -- size: " << element.data->size() << std::endl;
+        for (const auto& prop : element.data->properties) {
+          std::cout << "    - " << prop.key << " -- type: " << (prop.data->isList ? "list of " : "")
+                    << prop.data->type.name() << " -- size: " << prop.data->size() << std::endl;
         }
       }
       std::cout << "\n";
@@ -55,23 +52,21 @@ int main() {
     // Example of direct access
     {
       auto xData = data["vertex"]->properties["x"];
-      std::cout << "x value of the first vertex element:\n"
-                << xData->at<float>(0) << std::endl;
+      std::cout << "x value of the first vertex element:\n" << xData->at<float>(0) << std::endl;
       std::cout << "\n";
     }
 
     // Example of raw pointer access
     {
       auto vertexElement = data["vertex"];
-      std::cout << "Coordinates of the 5 first vertices (out of "
-                << vertexElement->size() << "):\n";
-      const float *ptX = vertexElement->properties["x"]->ptr<float>();
-      const float *ptY = vertexElement->properties["y"]->ptr<float>();
-      const float *ptZ = vertexElement->properties["z"]->ptr<float>();
+      std::cout << "Coordinates of the 5 first vertices (out of " << vertexElement->size()
+                << "):\n";
+      const float* ptX = vertexElement->properties["x"]->ptr<float>();
+      const float* ptY = vertexElement->properties["y"]->ptr<float>();
+      const float* ptZ = vertexElement->properties["z"]->ptr<float>();
       for (size_t i = 0; i < 5; ++i) {
         assert(i < vertexElement->size());
-        std::cout << "* " << ptX[i] << " " << ptY[i] << " " << ptZ[i]
-                  << std::endl;
+        std::cout << "* " << ptX[i] << " " << ptY[i] << " " << ptZ[i] << std::endl;
       }
       std::cout << "\n";
     }
@@ -85,8 +80,7 @@ int main() {
     std::cout << "Same output of the 5 first vertices:\n";
     for (size_t i = 0; i < 5; ++i) {
       assert(i < points.size());
-      std::cout << "* " << points[i][0] << " " << points[i][1] << " "
-                << points[i][2] << std::endl;
+      std::cout << "* " << points[i][0] << " " << points[i][1] << " " << points[i][2] << std::endl;
     }
     std::cout << "\n";
 
@@ -94,10 +88,8 @@ int main() {
     try {
       typedef std::vector<std::array<unsigned char, 4>> RGBACloud;
       RGBACloud rgbaCloud;
-      std::vector<plycpp::PropertyArrayConstPtr> properties{
-          data["vertex"]->properties["red"],
-          data["vertex"]->properties["green"],
-          data["vertex"]->properties["blue"],
+      std::vector<plycpp::PropertyArrayConstPtr> properties{data["vertex"]->properties["red"],
+          data["vertex"]->properties["green"], data["vertex"]->properties["blue"],
           data["vertex"]->properties["alpha"]};
       plycpp::packProperties<unsigned char, RGBACloud>(properties, rgbaCloud);
       std::cout << "RGBA colour of the 5 first vertices:\n";
@@ -109,23 +101,21 @@ int main() {
                   << static_cast<unsigned int>(rgbaCloud[i][3]) << std::endl;
       }
       std::cout << "\n";
-    } catch (const plycpp::Exception &e) {
+    } catch (const plycpp::Exception& e) {
       std::cout << e.what();
     }
 
     // Property lists are handled in a similar manner
     try {
-      const auto &vertexIndicesData =
-          data["face"]->properties["vertex_indices"];
+      const auto& vertexIndicesData = data["face"]->properties["vertex_indices"];
       if (vertexIndicesData && vertexIndicesData->isList) {
         // Only triplet lists are supported
         assert(vertexIndicesData->size() % 3 == 0);
         assert(vertexIndicesData->size() > 3);
 
         std::cout << "Vertex indices of the first triangle:\n"
-                  << "* " << vertexIndicesData->at<int>(0) << " "
-                  << vertexIndicesData->at<int>(1) << " "
-                  << vertexIndicesData->at<int>(2) << std::endl;
+                  << "* " << vertexIndicesData->at<int>(0) << " " << vertexIndicesData->at<int>(1)
+                  << " " << vertexIndicesData->at<int>(2) << std::endl;
       } else
         std::cout << "No valid list of vertex indices." << std::endl;
     } catch (const plycpp::Exception) {
@@ -136,8 +126,7 @@ int main() {
     {
       // Back conversion of the point cloud and normal cloud to PLYData
       plycpp::PLYData newPlyData;
-      plycpp::fromPointCloudAndNormals<float, Cloud>(points, normals,
-                                                     newPlyData);
+      plycpp::fromPointCloudAndNormals<float, Cloud>(points, normals, newPlyData);
 
       {
         std::string filename = "point_cloud_ascii.ply";
@@ -151,7 +140,7 @@ int main() {
         std::cout << "Point cloud exported to " << filename << std::endl;
       }
     }
-  } catch (const plycpp::Exception &e) {
+  } catch (const plycpp::Exception& e) {
     std::cout << "An exception happened:\n" << e.what() << std::endl;
   }
 
