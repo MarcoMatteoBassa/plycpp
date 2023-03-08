@@ -43,6 +43,11 @@ target_link_libraries(run_test_intensity plycpp)
 install(TARGETS run_test_intensity
   DESTINATION bin/${PROJECT_NAME}
 )
+target_include_directories(${PROJECT_NAME}
+  PUBLIC
+  $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+)
 ament_export_dependencies(
   pcl_conversions
 )
