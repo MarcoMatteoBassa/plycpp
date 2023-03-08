@@ -1,15 +1,18 @@
+find_package(ament_cmake_gtest REQUIRED)
+include(GoogleTest) 
+
 # Add the test executable to the project
-add_executable(run_test test.cpp)
-add_executable(run_test_intensity test_intensity.cpp)
+ament_add_gtest_executable(run_test test.cpp)
+ament_add_gtest_executable(run_test_intensity test_intensity.cpp)
 
 # Link the test executable with the library and gtest
-target_link_libraries(run_test PUBLIC GTest::GTest GTest::Main plycpp gtest_main pthread)
-target_link_libraries(run_test_intensity GTest::GTest GTest::Main plycpp gtest_main pthread)
+target_link_libraries(run_test plycpp gtest_main pthread)
+target_link_libraries(run_test_intensity plycpp gtest_main pthread)
 
 # Add a test target
-include(GoogleTest)
 gtest_discover_tests(run_test_intensity)
 gtest_discover_tests(run_test)
+
 install(TARGETS run_test_intensity
     DESTINATION bin/${PROJECT_NAME}
 )
