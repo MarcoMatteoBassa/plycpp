@@ -7,6 +7,8 @@ add_compile_options(-Wall -Wextra -Wpedantic)
 find_package(ament_cmake REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(PCL REQUIRED)
+find_package(ament_cmake_gtest REQUIRED)
+find_package(GTest REQUIRED)
 
 get_filename_component(MODELS_DIRECTORY
   "${CMAKE_CURRENT_SOURCE_DIR}/models"
@@ -25,6 +27,10 @@ ament_target_dependencies(${PROJECT_NAME} PUBLIC
   pcl_conversions
 )
 
+if(BUILD_TESTING)
+  add_subdirectory(src/test)
+endif()
+
 install(
   TARGETS ${PROJECT_NAME}
   EXPORT ${PROJECT_NAME}Targets)
@@ -33,16 +39,7 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
-add_executable(run_test src/test.cpp)
-target_link_libraries(run_test plycpp)
-install(TARGETS run_test
-  DESTINATION bin/${PROJECT_NAME}
-)
-add_executable(run_test_intensity src/test_intensity.cpp)
-target_link_libraries(run_test_intensity plycpp)
-install(TARGETS run_test_intensity
-  DESTINATION bin/${PROJECT_NAME}
-)
+
 target_include_directories(${PROJECT_NAME}
   PUBLIC
   $<INSTALL_INTERFACE:include>
