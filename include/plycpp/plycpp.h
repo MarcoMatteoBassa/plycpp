@@ -22,15 +22,17 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cassert>
-#include <memory>
+#include <gtest/gtest.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+
+#include <algorithm>
+#include <cassert>
+#include <filesystem>
+#include <memory>
 #include <string>
 #include <typeindex>
 #include <vector>
-
 namespace plycpp {
 extern const std::type_index CHAR;
 extern const std::type_index UCHAR;
@@ -44,19 +46,20 @@ extern const std::type_index DOUBLE;
 enum FileFormat { ASCII, BINARY };
 
 class Exception : public std::exception {
-protected:
+ protected:
   /** Error message.
    */
   std::string exception_;
 
-public:
-  Exception(const std::string &msg) : exception_(msg.c_str()) {
+ public:
+  Exception(const std::string& msg) : exception_(msg.c_str()) {
     std::cout << exception_ << std::endl;
   }
 };
 
-template <typename Key, typename T> struct KeyData {
-  KeyData(const Key key, const T &data) {
+template <typename Key, typename T>
+struct KeyData {
+  KeyData(const Key key, const T& data) {
     this->key = key;
     this->data = data;
   }
@@ -67,43 +70,41 @@ template <typename Key, typename T> struct KeyData {
 
 /// A list of elements that can be accessed through a given key for convenience.
 /// Access by key is not meant to be fast, but practical.
-template <typename Key, typename Data> class IndexedList {
-private:
+template <typename Key, typename Data>
+class IndexedList {
+ private:
   typedef KeyData<Key, std::shared_ptr<Data>> MyKeyData;
   typedef std::vector<MyKeyData> Container;
 
-public:
+ public:
   typedef typename Container::iterator iterator;
   typedef typename Container::const_iterator const_iterator;
 
-  std::shared_ptr<Data> operator[](const Key &key) {
-    auto it = std::find_if(begin(), end(),
-                           [&key](const MyKeyData &a) { return a.key == key; });
+  std::shared_ptr<Data> operator[](const Key& key) {
+    auto it = std::find_if(begin(), end(), [&key](const MyKeyData& a) { return a.key == key; });
     if (it != end())
       return it->data;
     else
       throw Exception("Invalid key.");
   }
 
-  const std::shared_ptr<const Data> operator[](const Key &key) const {
-    auto it = std::find_if(begin(), end(),
-                           [&key](const MyKeyData &a) { return a.key == key; });
+  const std::shared_ptr<const Data> operator[](const Key& key) const {
+    auto it = std::find_if(begin(), end(), [&key](const MyKeyData& a) { return a.key == key; });
     if (it != end())
       return it->data;
     else
       throw Exception("Invalid key.");
   }
 
-  bool has_key(const Key &key) {
-    auto it = std::find_if(begin(), end(),
-                           [&key](const MyKeyData &a) { return a.key == key; });
+  bool has_key(const Key& key) {
+    auto it = std::find_if(begin(), end(), [&key](const MyKeyData& a) { return a.key == key; });
     if (it != end())
       return true;
     else
       return false;
   }
 
-  void push_back(const Key &key, const std::shared_ptr<Data> &data) {
+  void push_back(const Key& key, const std::shared_ptr<Data>& data) {
     container.push_back(MyKeyData(key, data));
   }
 
@@ -114,7 +115,7 @@ public:
   iterator end() { return container.end(); };
   const_iterator end() const { return container.end(); };
 
-private:
+ private:
   Container container;
 };
 
@@ -125,22 +126,24 @@ typedef std::shared_ptr<PropertyArray> PropertyArrayPtr;
 typedef IndexedList<std::string, ElementArray> PLYData;
 
 class PropertyArray {
-public:
-  PropertyArray(const std::type_index type, const size_t size,
-                const bool isList = false);
+ public:
+  PropertyArray(const std::type_index type, const size_t size, const bool isList = false);
 
-  template <typename T> bool isOfType() const {
+  template <typename T>
+  bool isOfType() const {
     return type == std::type_index(typeid(T));
   }
 
-  template <typename T> const T *ptr() const {
+  template <typename T>
+  const T* ptr() const {
     assert(isOfType<T>());
-    return reinterpret_cast<const T *>(&data[0]);
+    return reinterpret_cast<const T*>(&data[0]);
   }
 
-  template <typename T> T *ptr() {
+  template <typename T>
+  T* ptr() {
     assert(isOfType<T>());
-    return reinterpret_cast<T *>(data.data());
+    return reinterpret_cast<T*>(data.data());
   }
 
   const size_t size() const {
@@ -148,16 +151,18 @@ public:
     return data.size() / stepSize;
   }
 
-  template <typename T> const T &at(const size_t i) const {
+  template <typename T>
+  const T& at(const size_t i) const {
     assert(isOfType<T>());
     assert((i + 1) * stepSize <= data.size());
-    return *reinterpret_cast<const T *>(&data[i * stepSize]);
+    return *reinterpret_cast<const T*>(&data[i * stepSize]);
   }
 
-  template <typename T> T &at(const size_t i) {
+  template <typename T>
+  T& at(const size_t i) {
     assert(isOfType<T>());
     assert((i + 1) * stepSize <= data.size());
-    return *reinterpret_cast<T *>(&data[i * stepSize]);
+    return *reinterpret_cast<T*>(&data[i * stepSize]);
   }
 
   std::vector<unsigned char> data;
@@ -167,54 +172,49 @@ public:
 };
 
 class ElementArray {
-public:
+ public:
   ElementArray(const size_t size) : size_(size) {}
 
   IndexedList<std::string, PropertyArray> properties;
 
   size_t size() const { return size_; }
 
-private:
+ private:
   size_t size_;
 };
 
 /// Load PLY data
-void load(const std::string &filename, PLYData &data);
+void load(const std::string& filename, PLYData& data);
 
 /// custom load
-void loadPLYFile(const std::string &filename,
-                 pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud);
+void loadPLYFile(const std::string& filename, pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud);
 
 /// load PLY data with intensity
-void loadPLYFileI(const std::string &filename,
-                  pcl::PointCloud<pcl::PointXYZI>::Ptr &cloud);
+void loadPLYFileI(const std::string& filename, pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud);
 
 /// function that transform a vector Cloud to pointXYZI
-pcl::PointCloud<pcl::PointXYZ>::Ptr
-convertVectorToXYZ(const std::vector<std::array<float, 3>> &points);
+pcl::PointCloud<pcl::PointXYZ>::Ptr convertVectorToXYZ(
+    const std::vector<std::array<float, 3>>& points);
 
 /// function that transform a vector Cloud to pointXYZ
-pcl::PointCloud<pcl::PointXYZI>::Ptr
-convertVectorToXYZI(const std::vector<std::array<float, 4>> &points);
+pcl::PointCloud<pcl::PointXYZI>::Ptr convertVectorToXYZI(
+    const std::vector<std::array<float, 4>>& points);
 
 /// Save PLY data
-void save(const std::string &filename, const PLYData &data,
-          const FileFormat format = FileFormat::BINARY);
+void save(
+    const std::string& filename, const PLYData& data, const FileFormat format = FileFormat::BINARY);
 
 /// Save PLY data with intensity
-void savePLYFileI(const std::string &filename,
-                  pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,
-                  const FileFormat format = FileFormat::BINARY);
+void savePLYFileI(const std::string& filename, pcl::PointCloud<pcl::PointXYZI>::Ptr cloud,
+    const FileFormat format = FileFormat::BINARY);
 /// Custom Save function
-void savePLYFile(const std::string &filename,
-                 pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
-                 const FileFormat format = FileFormat::BINARY);
+void savePLYFile(const std::string& filename, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,
+    const FileFormat format = FileFormat::BINARY);
 /// Pack n properties -- each represented by a vector of type T --
 /// into a multichannel vector (e.g. of type vector<std::array<T, n> >)
 template <typename T, typename OutputVector>
 void packProperties(
-    std::vector<std::shared_ptr<const PropertyArray>> properties,
-    OutputVector &output) {
+    std::vector<std::shared_ptr<const PropertyArray>> properties, OutputVector& output) {
   output.clear();
 
   if (properties.empty() || !properties.front()) {
@@ -226,12 +226,13 @@ void packProperties(
   const size_t nbProperties = properties.size();
 
   // Pointers to actual data
-  std::vector<const T *> ptsData;
-  for (auto &prop : properties) {
+  std::vector<const T*> ptsData;
+  for (auto& prop : properties) {
     // Check type consistency
     if (!prop || !prop->isOfType<T>() || prop->size() != size) {
-      std::cout << std::string("Missing properties or type inconsistency. I "
-                               "was expecting data of type ") +
+      std::cout << std::string(
+                       "Missing properties or type inconsistency. I "
+                       "was expecting data of type ") +
                        typeid(T).name();
       throw Exception(std::string("Missing properties or type inconsistency. I "
                                   "was expecting data of type ") +
@@ -251,15 +252,15 @@ void packProperties(
 
 /// Unpack a multichannel vector into a list of properties.
 template <typename T, typename OutputVector>
-void unpackProperties(const OutputVector &cloud,
-                      std::vector<std::shared_ptr<PropertyArray>> &properties) {
+void unpackProperties(
+    const OutputVector& cloud, std::vector<std::shared_ptr<PropertyArray>>& properties) {
   const size_t size = cloud.size();
   const size_t nbProperties = properties.size();
 
   // Initialize and get
   // Pointers to actual property data
-  std::vector<T *> ptsData;
-  for (auto &prop : properties) {
+  std::vector<T*> ptsData;
+  for (auto& prop : properties) {
     prop.reset(new PropertyArray(std::type_index(typeid(T)), size));
     ptsData.push_back(prop->ptr<T>());
   }
@@ -273,43 +274,37 @@ void unpackProperties(const OutputVector &cloud,
 }
 
 template <typename T, typename Cloud>
-void toPointCloud(const PLYData &plyData, Cloud &cloud) {
+void toPointCloud(const PLYData& plyData, Cloud& cloud) {
   cloud.clear();
   auto plyVertex = plyData["vertex"];
-  if (plyVertex->size() == 0)
-    return;
+  if (plyVertex->size() == 0) return;
   std::vector<std::shared_ptr<const PropertyArray>> properties{
-      plyVertex->properties["x"], plyVertex->properties["y"],
-      plyVertex->properties["z"]};
+      plyVertex->properties["x"], plyVertex->properties["y"], plyVertex->properties["z"]};
   packProperties<T, Cloud>(properties, cloud);
 }
 
 template <typename T, typename Cloud>
-void toPointCloudI(const PLYData &plyData, Cloud &cloud) {
+void toPointCloudI(const PLYData& plyData, Cloud& cloud) {
   cloud.clear();
   auto plyVertex = plyData["vertex"];
-  if (plyVertex->size() == 0)
-    return;
-  std::vector<std::shared_ptr<const PropertyArray>> properties{
-      plyVertex->properties["x"], plyVertex->properties["y"],
-      plyVertex->properties["z"], plyVertex->properties["intensity"]};
+  if (plyVertex->size() == 0) return;
+  std::vector<std::shared_ptr<const PropertyArray>> properties{plyVertex->properties["x"],
+      plyVertex->properties["y"], plyVertex->properties["z"], plyVertex->properties["intensity"]};
   packProperties<T, Cloud>(properties, cloud);
 }
 
 template <typename T, typename Cloud>
-void toNormalCloud(const PLYData &plyData, Cloud &cloud) {
+void toNormalCloud(const PLYData& plyData, Cloud& cloud) {
   cloud.clear();
   auto plyVertex = plyData["vertex"];
-  if (plyVertex->size() == 0)
-    return;
+  if (plyVertex->size() == 0) return;
   std::vector<std::shared_ptr<const PropertyArray>> properties{
-      plyVertex->properties["nx"], plyVertex->properties["ny"],
-      plyVertex->properties["nz"]};
+      plyVertex->properties["nx"], plyVertex->properties["ny"], plyVertex->properties["nz"]};
   packProperties<T, Cloud>(properties, cloud);
 }
 
 template <typename T, typename Cloud>
-void fromPointCloud(const Cloud &points, PLYData &plyData) {
+void fromPointCloud(const Cloud& points, PLYData& plyData) {
   const size_t size = points.size();
 
   plyData.clear();
@@ -326,7 +321,7 @@ void fromPointCloud(const Cloud &points, PLYData &plyData) {
 }
 
 template <typename T, typename Cloud>
-void fromPointCloudI(const Cloud &points, PLYData &plyData) {
+void fromPointCloudI(const Cloud& points, PLYData& plyData) {
   const size_t size = points.size();
 
   plyData.clear();
@@ -344,12 +339,10 @@ void fromPointCloudI(const Cloud &points, PLYData &plyData) {
 }
 
 template <typename T, typename Cloud>
-void fromPointCloudAndNormals(const Cloud &points, const Cloud &normals,
-                              PLYData &plyData) {
+void fromPointCloudAndNormals(const Cloud& points, const Cloud& normals, PLYData& plyData) {
   const size_t size = points.size();
 
-  if (size != normals.size())
-    throw Exception("Inconsistent size");
+  if (size != normals.size()) throw Exception("Inconsistent size");
 
   plyData.clear();
 
@@ -371,4 +364,4 @@ void fromPointCloudAndNormals(const Cloud &points, const Cloud &normals,
   plyData.push_back("vertex", vertex);
 }
 
-} // namespace plycpp
+}  // namespace plycpp
